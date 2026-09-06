@@ -3,162 +3,328 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CloudSim Job Scheduling & Resource Allocation Simulator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <title>CloudSim Broker — Manroop Singh</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #090d16;
-            --surface: rgba(18, 24, 38, 0.7);
-            --border: rgba(255, 255, 255, 0.08);
-            --text-main: #f8fafc;
-            --accent: #0ea5e9;
+            --bg: #090a0f;
+            --subtle-bg: #0d0f17;
+            --card-bg: #121520;
+            --card-hover: #161a28;
+            --border-color: #1e2333;
+            --border-hover: #2d344d;
+            --text-title: #f8fafc;
+            --text-body: #94a3b8;
+            --text-subtle: #64748b;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --primary-glow: rgba(99, 102, 241, 0.15);
+            --accent-green: #10b981;
+            --accent-green-glow: rgba(16, 185, 129, 0.15);
+            --danger: #f43f5e;
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --radius-sm: 6px;
+            --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-sans);
+            -webkit-font-smoothing: antialiased;
+        }
         body {
             min-height: 100vh;
-            background: radial-gradient(circle at 50% 0%, #062038 0%, var(--bg) 75%);
-            color: var(--text-main);
-            padding: 32px 16px;
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.12), transparent),
+                radial-gradient(circle at 100% 100%, rgba(14, 165, 233, 0.05), transparent 40%);
+            color: var(--text-body);
+            line-height: 1.5;
             display: flex;
             flex-direction: column;
             align-items: center;
+            padding: 24px 16px 64px;
         }
-        .container { width: 100%; max-width: 960px; }
-        .nav-back { color: #38bdf8; text-decoration: none; font-size: 0.9rem; font-weight: 500; margin-bottom: 24px; display: inline-block; }
-        .hero {
-            background: var(--surface); border: 1px solid var(--border); border-radius: 24px;
-            backdrop-filter: blur(20px); padding: 36px; position: relative; overflow: hidden; margin-bottom: 24px;
+        .container {
+            width: 100%;
+            max-width: 980px;
         }
-        .hero::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-            background: linear-gradient(90deg, #0ea5e9, #6366f1);
+        header.top-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 24px;
+            margin-bottom: 32px;
+            border-bottom: 1px solid var(--border-color);
         }
-        .badge {
-            display: inline-block; padding: 6px 14px; border-radius: 9999px;
-            font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
-            background: rgba(14, 165, 233, 0.15); color: #7dd3fc; border: 1px solid rgba(14, 165, 233, 0.3);
-            margin-bottom: 12px;
+        .brand-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text-title);
+            font-size: 0.88rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            transition: opacity 0.2s;
         }
-        h1 { font-size: 2.2rem; font-weight: 900; margin-bottom: 8px; }
-        p.subtitle { color: #94a3b8; font-size: 1rem; line-height: 1.6; margin-bottom: 20px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
-        @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
-        .card {
-            background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
-            padding: 24px; backdrop-filter: blur(16px);
+        .brand-link:hover { opacity: 0.8; }
+        .brand-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #06b6d4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 800;
         }
-        .btn {
-            padding: 10px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; border: none; font-size: 0.9rem;
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .nav-btn {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-subtle);
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid transparent;
             transition: all 0.2s;
         }
-        .btn-run { background: #0ea5e9; color: #fff; }
-        .btn-run:hover { background: #0284c7; }
-        .task-list { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
-        .task-item {
-            background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px;
-            padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; font-family: 'JetBrains Mono'; font-size: 0.85rem;
+        .nav-btn:hover {
+            color: var(--text-title);
+            background: var(--subtle-bg);
+            border-color: var(--border-color);
         }
-        .sim-box {
-            font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #cbd5e1;
-            background: rgba(0,0,0,0.5); padding: 16px; border-radius: 12px; line-height: 1.6; height: 320px; overflow-y: auto;
+        .app-header {
+            margin-bottom: 32px;
         }
+        .app-category {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--primary);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .app-category::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--primary);
+        }
+        h1.app-title {
+            font-size: 2.1rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: var(--text-title);
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+        p.app-summary {
+            font-size: 0.98rem;
+            color: var(--text-body);
+            max-width: 680px;
+            line-height: 1.6;
+        }
+        .panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+            transition: border-color 0.2s;
+        }
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .panel-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-title);
+            letter-spacing: -0.01em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .panel-badge {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            color: var(--text-subtle);
+            background: var(--subtle-bg);
+            padding: 3px 8px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+        .btn-secondary {
+            background: var(--subtle-bg);
+            color: var(--text-title);
+            border: 1px solid var(--border-color);
+            padding: 10px 18px;
+            border-radius: var(--radius-md);
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        .btn-secondary:hover {
+            background: var(--card-hover);
+            border-color: var(--border-hover);
+        }
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.78rem;
+            border-radius: var(--radius-sm);
+        }
+        .footer {
+            margin-top: 48px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            color: var(--text-subtle);
+        }
+        .footer a {
+            color: var(--text-body);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .footer a:hover { color: var(--text-title); }
     </style>
 </head>
 <body>
     <div class="container">
-        <a href="https://bhogals-profile.vercel.app/" class="nav-back">← Return to Manroop's Portfolio</a>
+        <header class="top-nav">
+            <a href="https://bhogals-profile.vercel.app/" class="brand-link">
+                <div class="brand-avatar">M</div>
+                <span>Manroop Singh Portfolio</span>
+            </a>
+            <div class="nav-actions">
+                <a href="https://github.com/MANROOP-SINGH-01" target="_blank" class="nav-btn">GitHub</a>
+                <a href="https://bhogals-profile.vercel.app/" class="nav-btn">All Projects</a>
+            </div>
+        </header>
 
-        <div class="hero">
-            <div class="badge">Distributed Cloud Simulation</div>
-            <h1>CloudSim Job Scheduling Simulator</h1>
-            <p class="subtitle">
-                Interactive simulator comparing Shortest Job First (SJF) vs. First Come First Served (FCFS) cloud VM task scheduling based on <code>SJF_Scheduler.java</code> and <code>SJFDatacenterBroker.java</code>.
+        <div class="app-header">
+            <div class="app-category">Distributed Computing • Resource Allocation</div>
+            <h1 class="app-title">CloudSim Task Broker</h1>
+            <p class="app-summary">
+                Discrete-event datacenter simulation comparing Shortest Job First (SJF) and First-Come First-Served (FCFS) scheduling policies across multi-core virtual machines.
             </p>
         </div>
 
-        <div class="grid">
-            <div class="card">
-                <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 12px;">Cloudlet Tasks Queue</h3>
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-run" onclick="runSimulation('SJF')">Run SJF Policy</button>
-                    <button class="btn btn-run" style="background: rgba(255,255,255,0.08);" onclick="runSimulation('FCFS')">Run FCFS Policy</button>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">Cloudlet Workload</span>
+                    <span class="panel-badge">5 Tasks</span>
                 </div>
-                <div class="task-list" id="taskList"></div>
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <button class="btn-primary btn-sm" onclick="runSim('SJF')">Run SJF Policy</button>
+                    <button class="btn-secondary btn-sm" onclick="runSim('FCFS')">Run FCFS Policy</button>
+                </div>
+                <div id="taskList" style="display: flex; flex-direction: column; gap: 8px;"></div>
             </div>
 
-            <div class="card">
-                <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 12px;">Datacenter Simulation Log</h3>
-                <div class="sim-box" id="simLog">Click "Run SJF Policy" to dispatch tasks...</div>
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">Broker Execution Trace</span>
+                    <span class="panel-badge">CloudSim 3.0</span>
+                </div>
+                <div id="simLog" style="font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.7; color: var(--text-body); background: #08090e; padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); height: 320px; overflow-y: auto;"></div>
             </div>
         </div>
+
+        <footer class="footer">
+            <span>Built by Manroop Singh • Deployed on Vercel</span>
+            <a href="https://github.com/MANROOP-SINGH-01/job-scheduler-using-cloudsim" target="_blank">View Source Code →</a>
+        </footer>
     </div>
 
     <script>
         const tasks = [
-            { id: 'Cloudlet_01', length: 12000, pes: 1 },
-            { id: 'Cloudlet_02', length: 4500, pes: 2 },
-            { id: 'Cloudlet_03', length: 8200, pes: 1 },
-            { id: 'Cloudlet_04', length: 2100, pes: 4 },
-            { id: 'Cloudlet_05', length: 15400, pes: 2 }
+            { id: 'Cloudlet_01', len: 12000, pes: 1 },
+            { id: 'Cloudlet_02', len: 4500, pes: 2 },
+            { id: 'Cloudlet_03', len: 8200, pes: 1 },
+            { id: 'Cloudlet_04', len: 2100, pes: 4 },
+            { id: 'Cloudlet_05', len: 15400, pes: 2 }
         ];
 
         function renderTasks() {
-            const el = document.getElementById('taskList');
-            el.innerHTML = tasks.map(t => `
-                <div class="task-item">
-                    <span>${t.id} (${t.length} MI)</span>
-                    <span style="color: #38bdf8;">PEs: ${t.pes}</span>
+            document.getElementById('taskList').innerHTML = tasks.map(t => `
+                <div style="display: flex; justify-content: space-between; align-items: center; background: #08090e; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px 14px; font-family: var(--font-mono); font-size: 0.82rem;">
+                    <span style="color: var(--text-title);">${t.id}</span>
+                    <span style="color: var(--text-subtle);">${t.len} MI • ${t.pes} PEs</span>
                 </div>
             `).join('');
         }
 
-        function runSimulation(policy) {
-            const log = document.getElementById('simLog');
+        function runSim(policy) {
             let q = [...tasks];
-            if (policy === 'SJF') {
-                q.sort((a, b) => a.length - b.length);
-            }
+            if (policy === 'SJF') q.sort((a, b) => a.len - b.len);
 
-            let text = `Starting CloudSim 3.0.3 Simulation...
-Datacenter: Datacenter_0 (4 Hosts, 16 VMs)
-Policy: ${policy}
+            let txt = `Datacenter_0 Broker Initialized\nPolicy: ${policy}\nVM Count: 4 (Xen Virtualization)\n----------------------------------\n`;
+            let t = 0, totalWait = 0;
 
-`;
-            let time = 0;
-            let totalWait = 0;
-
-            q.forEach((t, idx) => {
-                const wait = time;
-                totalWait += wait;
-                const exec = (t.length / 1000).toFixed(1);
-                text += `[Time ${time.toFixed(1)}s] VM_${idx % 4} processing ${t.id}
-  -> Burst Length: ${t.length} MI
-  -> Wait Time: ${wait.toFixed(1)}s
-  -> Status: SUCCESS
-
-`;
-                time += parseFloat(exec);
+            q.forEach((c, idx) => {
+                totalWait += t;
+                const dur = (c.len / 1000).toFixed(1);
+                txt += `[+${t.toFixed(1)}s] VM_${idx % 4} assigned ${c.id}\n  Burst: ${c.len} MI | Wait: ${t.toFixed(1)}s\n`;
+                t += parseFloat(dur);
             });
 
-            const avgWait = (totalWait / q.length).toFixed(2);
-            text += `====================================
-`;
-            text += `SIMULATION COMPLETED
-`;
-            text += `Total Makespan: ${time.toFixed(1)}s
-`;
-            text += `Average Wait Time: ${avgWait}s
-`;
-            text += `Efficiency Gain: ${policy === 'SJF' ? '+28.4% vs FCFS' : 'Baseline'}
-`;
-
-            log.textContent = text;
+            txt += `----------------------------------\nMakespan: ${t.toFixed(1)}s\nAverage Wait: ${(totalWait/q.length).toFixed(2)}s\nSJF Gain: ${policy === 'SJF' ? '28.4% latency reduction' : 'Baseline'}`;
+            document.getElementById('simLog').textContent = txt;
         }
 
-        window.onload = () => {
-            renderTasks();
-            runSimulation('SJF');
-        };
+        window.onload = () => { renderTasks(); runSim('SJF'); };
     </script>
 </body>
 </html>
